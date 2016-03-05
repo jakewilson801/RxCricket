@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/empty">
+        <shape
+            android:innerRadius="0dp"
+            android:shape="rectangle"
+            android:thicknessRatio="2"
+            android:useLevel="false">
+            <solid android:color="@android:color/transparent" />
+
+            <stroke
+                android:width="2dp"
+                android:color="@color/strike_one" />
+        </shape>
+    </item>
     <item android:id="@+id/first_strike">
         <rotate android:fromDegrees="45">
             <shape android:shape="line">
@@ -20,11 +33,22 @@
             </shape>
         </rotate>
     </item>
-
     <item android:id="@+id/third_strike">
-        <shape android:shape="oval">
-            <gradient android:startColor="@color/strike_one" android:endColor="@color/strike_one"
-                android:angle="270"/>
+        <!--<shape android:shape="oval">-->
+        <!--<gradient android:startColor="@color/strike_one" android:endColor="@color/strike_one"-->
+        <!--android:angle="270"/>-->
+        <!--</shape>-->
+        <shape
+            android:innerRadius="0dp"
+            android:shape="ring"
+            android:thicknessRatio="2"
+            android:useLevel="false">
+            <solid android:color="@android:color/transparent" />
+
+            <stroke
+                android:width="2dp"
+                android:color="@color/strike_one" />
         </shape>
+
     </item>
 </layer-list>

@@ -3,8 +3,13 @@ package me.jakewilson.rxcricket
 import android.graphics.drawable.LayerDrawable
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import com.facebook.rebound.SimpleSpringListener
+import com.facebook.rebound.Spring
+import com.facebook.rebound.SpringSystem
+import com.facebook.rebound.SpringUtil
 import kotlinx.android.synthetic.main.score_item.view.*
 
 /**
@@ -16,32 +21,42 @@ class ScoreAdapter : RecyclerView.Adapter<ScoreAdapter.ScoreViewHolder>() {
 
     enum class STRIKE_LEVEL { NONE, FIRST, SECOND, THIRD }
 
-
     data class ScoreItem(var strikeP1: STRIKE_LEVEL, var strikeP2: STRIKE_LEVEL, val label: String, val score: Int)
 
     override fun getItemCount(): Int = scores.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, itemType: Int): ScoreViewHolder {
-        return ScoreViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.score_item, parent, false))
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, itemType: Int): ScoreViewHolder = ScoreViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.score_item, parent, false))
 
-    override fun onBindViewHolder(holder: ScoreViewHolder, position: Int) {
-        holder.bindScore(scores[position], this)
-    }
+    override fun onBindViewHolder(holder: ScoreViewHolder, position: Int) = holder.bindScore(scores[position], this)
 
     class ScoreViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bindScore(score: ScoreAdapter.ScoreItem, adapter: ScoreAdapter) {
             with(score) {
+                val springSystem = SpringSystem.create()
+                val springListener = DartsSpringListener(score, adapter)
+                val scaleSpring = springSystem.createSpring()
+                scaleSpring.addListener(springListener)
                 itemView.which_target.text = score.label
-                val layer = (itemView.context.resources.getDrawable(R.drawable.chalk_marks) as LayerDrawable)
-                processStrikeImage(score.strikeP1, layer)
-                processStrikeImage(score.strikeP2, layer)
-                itemView.player_one_score.background = layer
-                itemView.player_two_score.background = layer
+                val layer1 = (itemView.context.resources.getDrawable(R.drawable.chalk_marks) as LayerDrawable)
+                val layer2 = (itemView.context.resources.getDrawable(R.drawable.chalk_marks) as LayerDrawable)
+                processStrikeImage(score.strikeP1, layer1)
+                processStrikeImage(score.strikeP2, layer2)
+                itemView.player_one_score.background = layer1
+                itemView.player_two_score.background = layer2
 
                 itemView.player_one_score.setOnClickListener {
-                    score.strikeP1 = incrementClick(score.strikeP1)
-                    adapter.notifyDataSetChanged()
+
+                }
+
+                itemView.player_one_score.setOnTouchListener {
+                    view, motionEvent ->
+                    when (motionEvent.action) {
+                        MotionEvent.ACTION_DOWN -> scaleSpring.endValue = 1.0
+                        MotionEvent.ACTION_UP -> scaleSpring.endValue = 0.0
+                        MotionEvent.ACTION_CANCEL -> scaleSpring.endValue = 0.0
+
+                    }
+                    true
                 }
 
                 itemView.player_two_score.setOnClickListener {
@@ -66,28 +81,55 @@ class ScoreAdapter : RecyclerView.Adapter<ScoreAdapter.ScoreViewHolder>() {
                     //NO OP
                 }
             }
-            return STRIKE_LEVEL.NONE
+            return STRIKE_LEVEL.THIRD;
         }
 
 
         fun processStrikeImage(strike: STRIKE_LEVEL, score: LayerDrawable) {
             when (strike) {
                 STRIKE_LEVEL.NONE -> {
-                    //                score.findDrawableByLayerId(R.id.first_strike).alpha = 0
-                    //                score.findDrawableByLayerId(R.id.second_strike).alpha = 0
-                    //                score.findDrawableByLayerId(R.id.third_strike).alpha = 0
+                    score.findDrawableByLayerId(R.id.empty).alpha = 255
+                    score.findDrawableByLayerId(R.id.first_strike).alpha = 0
+                    score.findDrawableByLayerId(R.id.second_strike).alpha = 0
+                    score.findDrawableByLayerId(R.id.third_strike).alpha = 0
                 }
                 STRIKE_LEVEL.FIRST -> {
+                    score.findDrawableByLayerId(R.id.empty).alpha = 0
+                    score.findDrawableByLayerId(R.id.first_strike).alpha = 255
                     score.findDrawableByLayerId(R.id.second_strike).alpha = 0
                     score.findDrawableByLayerId(R.id.third_strike).alpha = 0
                 }
                 STRIKE_LEVEL.SECOND -> {
+                    score.findDrawableByLayerId(R.id.empty).alpha = 0
+                    score.findDrawableByLayerId(R.id.first_strike).alpha = 255
+                    score.findDrawableByLayerId(R.id.second_strike).alpha = 255
                     score.findDrawableByLayerId(R.id.third_strike).alpha = 0
                 }
-                else -> {
-                    // NO OP
+                STRIKE_LEVEL.THIRD -> {
+                    score.findDrawableByLayerId(R.id.empty).alpha = 0
+                    score.findDrawableByLayerId(R.id.first_strike).alpha = 255
+                    score.findDrawableByLayerId(R.id.second_strike).alpha = 255
+                    score.findDrawableByLayerId(R.id.third_strike).alpha = 255
                 }
             }
          }
+
+        inner class DartsSpringListener(score: ScoreItem, scoreAdapter: ScoreAdapter) : SimpleSpringListener() {
+            val score = score
+            val scoreAdapter = scoreAdapter
+            override fun onSpringUpdate(spring: Spring){
+                var mappedValue = SpringUtil.mapValueFromRangeToRange(spring.currentValue, 0.0, 1.0, 1.0, 0.5)
+                itemView.player_one_score.scaleX = mappedValue.toFloat()
+                itemView.player_one_score.scaleY = mappedValue.toFloat()
+
+            }
+
+            override fun onSpringAtRest(spring: Spring){
+                score.strikeP1 = incrementClick(score.strikeP1)
+                scoreAdapter.notifyDataSetChanged()
+            }
+
+
+        }
     }
 }

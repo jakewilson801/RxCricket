@@ -9,6 +9,7 @@ android {
     defaultConfig {
         applicationId "me.jakewilson.rxcricket"
         minSdkVersion 21
+        vectorDrawables.useSupportLibrary = true
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -30,6 +31,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'com.android.support:cardview-v7:23.2.0'
     compile 'com.android.support:recyclerview-v7:23.2.0'
+    compile 'com.facebook.rebound:rebound:0.3.8'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
