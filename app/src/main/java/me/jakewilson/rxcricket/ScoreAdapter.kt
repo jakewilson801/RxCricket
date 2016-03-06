@@ -36,15 +36,20 @@ class ScoreAdapter : RecyclerView.Adapter<ScoreAdapter.ScoreViewHolder>() {
                 val springSystemP2 = SpringSystem.create()
                 val springListenerP1 = DartsSpringListener(score, adapter, itemView.player_one_score, true)
                 val springListenerP2 = DartsSpringListener(score, adapter, itemView.player_two_score, false)
+
                 val scaleSpringP1 = springSystemP1.createSpring()
                 val scaleSpringP2 = springSystemP2.createSpring()
+
                 scaleSpringP1.addListener(springListenerP1)
                 scaleSpringP2.addListener(springListenerP2)
                 itemView.which_target.text = score.label
+
                 val layer1 = (itemView.context.resources.getDrawable(R.drawable.chalk_marks) as LayerDrawable)
                 val layer2 = (itemView.context.resources.getDrawable(R.drawable.chalk_marks) as LayerDrawable)
+
                 processStrikeImage(score.strikeP1, layer1)
                 processStrikeImage(score.strikeP2, layer2)
+
                 itemView.player_one_score.background = layer1
                 itemView.player_two_score.background = layer2
                 itemView.player_one_score.setOnTouchListener {
