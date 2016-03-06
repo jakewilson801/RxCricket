@@ -139,11 +139,8 @@ class ScoreAdapter : RecyclerView.Adapter<ScoreAdapter.ScoreViewHolder>() {
                     score.strikeP1 = incrementClick(score.strikeP1)
                 else
                     score.strikeP2 = incrementClick(score.strikeP2)
-
                 scoreAdapter.notifyDataSetChanged()
             }
-
-
         }
     }
 }
