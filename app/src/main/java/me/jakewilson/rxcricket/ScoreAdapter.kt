@@ -32,10 +32,14 @@ class ScoreAdapter : RecyclerView.Adapter<ScoreAdapter.ScoreViewHolder>() {
     class ScoreViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bindScore(score: ScoreAdapter.ScoreItem, adapter: ScoreAdapter) {
             with(score) {
-                val springSystem = SpringSystem.create()
-                val springListener = DartsSpringListener(score, adapter)
-                val scaleSpring = springSystem.createSpring()
-                scaleSpring.addListener(springListener)
+                val springSystemP1 = SpringSystem.create()
+                val springSystemP2 = SpringSystem.create()
+                val springListenerP1 = DartsSpringListener(score, adapter, itemView.player_one_score, true)
+                val springListenerP2 = DartsSpringListener(score, adapter, itemView.player_two_score, false)
+                val scaleSpringP1 = springSystemP1.createSpring()
+                val scaleSpringP2 = springSystemP2.createSpring()
+                scaleSpringP1.addListener(springListenerP1)
+                scaleSpringP2.addListener(springListenerP2)
                 itemView.which_target.text = score.label
                 val layer1 = (itemView.context.resources.getDrawable(R.drawable.chalk_marks) as LayerDrawable)
                 val layer2 = (itemView.context.resources.getDrawable(R.drawable.chalk_marks) as LayerDrawable)
@@ -43,18 +47,22 @@ class ScoreAdapter : RecyclerView.Adapter<ScoreAdapter.ScoreViewHolder>() {
                 processStrikeImage(score.strikeP2, layer2)
                 itemView.player_one_score.background = layer1
                 itemView.player_two_score.background = layer2
-
-                itemView.player_one_score.setOnClickListener {
-
-                }
-
                 itemView.player_one_score.setOnTouchListener {
                     view, motionEvent ->
                     when (motionEvent.action) {
-                        MotionEvent.ACTION_DOWN -> scaleSpring.endValue = 1.0
-                        MotionEvent.ACTION_UP -> scaleSpring.endValue = 0.0
-                        MotionEvent.ACTION_CANCEL -> scaleSpring.endValue = 0.0
+                        MotionEvent.ACTION_DOWN -> scaleSpringP1.endValue = 1.0
+                        MotionEvent.ACTION_UP -> scaleSpringP1.endValue = 0.0
+                        MotionEvent.ACTION_CANCEL -> scaleSpringP1.endValue = 0.0
+                    }
+                    true
+                }
 
+                itemView.player_two_score.setOnTouchListener {
+                    view, motionEvent ->
+                    when (motionEvent.action) {
+                        MotionEvent.ACTION_DOWN -> scaleSpringP2.endValue = 1.0
+                        MotionEvent.ACTION_UP -> scaleSpringP2.endValue = 0.0
+                        MotionEvent.ACTION_CANCEL -> scaleSpringP2.endValue = 0.0
                     }
                     true
                 }
@@ -114,18 +122,24 @@ class ScoreAdapter : RecyclerView.Adapter<ScoreAdapter.ScoreViewHolder>() {
             }
          }
 
-        inner class DartsSpringListener(score: ScoreItem, scoreAdapter: ScoreAdapter) : SimpleSpringListener() {
+        inner class DartsSpringListener(score: ScoreItem, scoreAdapter: ScoreAdapter, view: View, isPlayerOne: Boolean) : SimpleSpringListener() {
             val score = score
             val scoreAdapter = scoreAdapter
+            val whichView = view
+            val isPlayerOne = isPlayerOne
+
             override fun onSpringUpdate(spring: Spring){
                 var mappedValue = SpringUtil.mapValueFromRangeToRange(spring.currentValue, 0.0, 1.0, 1.0, 0.5)
-                itemView.player_one_score.scaleX = mappedValue.toFloat()
-                itemView.player_one_score.scaleY = mappedValue.toFloat()
-
+                whichView.scaleX = mappedValue.toFloat()
+                whichView.scaleY = mappedValue.toFloat()
             }
 
             override fun onSpringAtRest(spring: Spring){
-                score.strikeP1 = incrementClick(score.strikeP1)
+                if(isPlayerOne)
+                    score.strikeP1 = incrementClick(score.strikeP1)
+                else
+                    score.strikeP2 = incrementClick(score.strikeP2)
+
                 scoreAdapter.notifyDataSetChanged()
             }
 
