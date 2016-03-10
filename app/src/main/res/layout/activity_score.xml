@@ -26,7 +26,24 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/scores_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/player_two" />
+
+    <TextView
+        android:layout_below="@id/scores_list"
+        android:id="@+id/player_one_score_label"
+        android:textSize="20sp"
+        android:text="0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:text="0"
+        android:textSize="20sp"
+        android:id="@+id/player_two_score_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/player_one_score_label"
+        android:layout_alignEnd="@+id/scores_list" />
 
 </RelativeLayout>
