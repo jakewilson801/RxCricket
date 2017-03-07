@@ -16,10 +16,10 @@ class ScoreActivity : AppCompatActivity() {
         scores_list.adapter = scoreAdapter
         busObservable.toObserverable().subscribe { score ->
             if(score.isP1){
-                var currentScore: Int? = player_one_score_label.text.toString().toInt()
+                val currentScore: Int? = player_one_score_label.text.toString().toInt()
                 player_one_score_label.text = ((currentScore ?: 0 ) + (score.score ?: 0)).toString()
             } else{
-                var currentScore: Int? = player_two_score_label.text.toString().toInt()
+                val currentScore: Int? = player_two_score_label.text.toString().toInt()
                 player_two_score_label.text = ((currentScore ?: 0 ) + (score.score ?: 0)).toString()
             }
         }
